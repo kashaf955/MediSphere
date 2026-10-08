@@ -39,7 +39,7 @@ const Navbar = () => {
             <div className="flex flex-col gap-2 p-2 rounded-md">
               <button onClick={() => navigate("/my-appointments")} className="text-sm font-medium my-1 hover:bg-gray-100 p-2 rounded-md text-left cursor-pointer">My Appointments</button>
               <button onClick={() => navigate("/my-profile")} className="text-sm font-medium my-1 hover:bg-gray-100 p-2 rounded-md text-left cursor-pointer">My Profile</button>
-              <button onClick={() => navigate("/logout")} className="text-sm font-medium my-1 hover:bg-gray-100 p-2 rounded-md text-left cursor-pointer">Logout</button>
+              <button onClick={() => setToken(false)} className="text-sm font-medium my-1 hover:bg-gray-100 p-2 rounded-md text-left cursor-pointer">Logout</button>
             </div>
           </div>
         </div> :

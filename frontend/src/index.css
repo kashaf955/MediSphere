@@ -4,3 +4,7 @@
   --color-primary: #5258f8;
   --color-secondary: #ffffff;
 }
+
+body {
+  background-color: #ffffff;
+}
