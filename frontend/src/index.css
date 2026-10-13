@@ -1,8 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
 @import "tailwindcss";
 
 @theme {
   --color-primary: #5258f8;
   --color-secondary: #ffffff;
+  --font-brand: "Questrial", sans-serif;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-brand);
+    font-weight: 400;
+  }
 }
 
 body {
