@@ -4,23 +4,23 @@ import { Link } from 'react-router-dom'
 
 const Hero = () => {
   return (
-    <div className='flex flex-col md:flex-row flex-wrap bg-primary rounded-lg px-6 md:px-10 lg:px-20 mt-4 overflow-hidden'>
+    <div className='mt-4 mb-4 flex h-auto flex-col overflow-hidden rounded-lg bg-primary px-5 py-8 sm:px-6 md:h-[calc(100dvh-8.75rem)] md:flex-row md:py-0 md:pl-10 md:pr-0 lg:pl-20'>
         {/* Left Side */}
-        <div className='md:w-1/2 flex flex-col items-start justify-center gap-4 py-10 m-auto md:py-[10vw] md:mb-[-30px]'>
-            <p className='text-3xl md:text-4xl lg:text-5xl text-white font-semibold leading-tight md:leading-tight lg:leading-tight'>
-                Book Appointment <br /> With Trusted Doctors
+        <div className='flex flex-col items-center justify-center gap-4 text-center md:w-[42%] md:items-start md:py-8 md:pr-4 md:text-left'>
+            <p className='text-3xl font-bold leading-tight text-white md:text-3xl lg:text-4xl'>
+                Book Appointment <br className='hidden sm:block' /> With Trusted Doctors
             </p>
-            <div className='flex flex-col md:flex-row items-center gap-3 text-white text-sm font-light'>
-                <img className='w-28' src={assets.group_profiles} alt="" />
-                <p>Simply browse through our extensive list of trusted doctors, <br className='hidden sm:block' /> schedule your appointment hassle-free.</p>
+            <div className='flex flex-col items-center gap-3 text-sm font-light text-white md:flex-row'>
+                <img className='w-24 sm:w-28' src={assets.group_profiles} alt="" />
+                <p className='text-center text-sm font-normal md:text-left'>Simply browse through our extensive list of trusted doctors, schedule your appointment hassle-free.</p>
             </div>
-            <Link to="/doctors" className='flex items-center gap-2 bg-white px-8 py-3 rounded-full text-[#595959] text-sm m-auto md:m-0 hover:scale-105 transition-all duration-300'>
+            <Link to="/doctors" className='flex items-center gap-2 rounded-full bg-white px-8 py-3 text-sm text-[#595959] transition-all duration-300 hover:scale-105'>
                 Book appointment <img className='w-3' src={assets.arrow_icon} alt="" />
             </Link>
         </div>
         {/* Right Side */}
-        <div className='md:w-1/2 relative'>
-            <img className='w-full md:absolute bottom-0 h-auto rounded-lg' src={assets.header_img} alt="" />
+        <div className='mt-6 flex w-full items-end justify-center md:mt-0 md:w-[58%] md:justify-end'>
+            <img className='h-[300px] max-h-64 w-full object-contain object-bottom sm:max-h-80 md:mr-4 md:h-full md:max-h-full' src={assets.header_img} alt="" />
         </div>
     </div>
   )

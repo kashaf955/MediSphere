@@ -15,9 +15,9 @@ const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [token, setToken] = useState(true);
   return (
-    <div className="flex justify-between items-center border-b-2 border-gray-200 py-2">
-      <img src={assets.logo} alt="logo" className="w-45 h-20" />
-      <ul className="flex gap-5 md:flex items-start font-medium">
+    <div className="flex items-center justify-between border-b-2 border-gray-200 py-2">
+      <img src={assets.logo} alt="logo" className="h-14 w-36 md:h-20 md:w-45" />
+      <ul className="hidden items-start gap-5 font-medium md:flex">
         {navLinks.map(({ to, label, end }) => (
           <NavLink key={to} to={to} end={end} className="flex flex-col items-center">
             {({ isActive }) => (
@@ -30,7 +30,7 @@ const Navbar = () => {
         ))}
       </ul>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-3">
         {token ?
         <div className="flex gap-2 items-center cursor-pointer group relative">
           <img src={assets.profile_pic} alt="user" className="w-10 h-10 rounded-full" />
@@ -43,8 +43,29 @@ const Navbar = () => {
             </div>
           </div>
         </div> :
-          <button onClick={() => navigate("/create-account")} className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/80 md:block hidden">Create Account</button>
+          <button onClick={() => navigate("/create-account")} className="hidden rounded-full bg-primary px-4 py-2 text-white hover:bg-primary/80 md:block">Create Account</button>
         }
+        <button type="button" onClick={() => setShowMenu(true)} className="md:hidden" aria-label="Open menu">
+          <img src={assets.menu_icon} alt="" className="w-6" />
+        </button>
+      </div>
+
+      <div className={`${showMenu ? "fixed" : "hidden"} inset-0 z-30 bg-white md:hidden`}>
+        <div className="flex items-center justify-between px-5 py-6">
+          <img src={assets.logo} alt="logo" className="h-14 w-36" />
+          <button type="button" onClick={() => setShowMenu(false)} aria-label="Close menu">
+            <img src={assets.cross_icon} alt="" className="w-7" />
+          </button>
+        </div>
+        <ul className="mt-4 flex flex-col gap-2 px-5 text-lg font-medium">
+          {navLinks.map(({ to, label, end }) => (
+            <NavLink key={to} to={to} end={end} onClick={() => setShowMenu(false)} className="rounded-md px-4 py-3">
+              {({ isActive }) => (
+                <span className={isActive ? "text-primary" : ""}>{label}</span>
+              )}
+            </NavLink>
+          ))}
+        </ul>
       </div>
     </div>
   );
