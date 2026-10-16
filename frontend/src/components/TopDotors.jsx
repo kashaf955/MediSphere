@@ -24,7 +24,7 @@ const TopDotors = () => {
                 </div>
             ))}
          </div>
-         <button className='flex items-center gap-2 rounded-full bg-blue-50 px-8 py-3 text-sm text-[#595959] transition-all duration-300 hover:scale-105'>View All Doctors</button>
+         <button onClick={() =>{ navigate('/doctors'); scrollTo(0, 0)}} className='flex items-center gap-2 rounded-full bg-blue-50 px-8 py-3 text-sm text-[#595959] transition-all duration-300 hover:scale-105'>View All Doctors</button>
     </div>
   )
 }
