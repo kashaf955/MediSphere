@@ -16,7 +16,7 @@ const Navbar = () => {
   const [token, setToken] = useState(true);
   return (
     <div className="flex items-center justify-between border-b-2 border-gray-200 py-2">
-      <img src={assets.logo} alt="logo" className="h-14 w-36 md:h-20 md:w-45" />
+      <img onClick={() => navigate("/")} src={assets.logo} alt="logo" className="h-14 w-36 md:h-20 md:w-45" />
       <ul className="hidden items-start gap-5 font-medium md:flex">
         {navLinks.map(({ to, label, end }) => (
           <NavLink key={to} to={to} end={end} className="flex flex-col items-center">
