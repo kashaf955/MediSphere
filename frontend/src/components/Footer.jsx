@@ -33,7 +33,7 @@ const Footer = () => {
         </div>
         {/* ------ copyright section ------ */}
         <div className='border-t border-gray-200 py-5'>
-             <p className='text-center text-sm text-gray-500'>Copyright © 2026 DoctorApp. All rights reserved.</p>
+             <p className='text-center text-sm text-gray-500'>Copyright © 2026 MediSphere. All rights reserved.</p>
         </div>
     </footer>
   )

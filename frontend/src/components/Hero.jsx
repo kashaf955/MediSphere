@@ -20,7 +20,7 @@ const Hero = () => {
         </div>
         {/* Right Side */}
         <div className='mt-6 flex w-full items-end justify-center md:mt-0 md:w-[58%] md:justify-end'>
-            <img className='h-[360px] max-h-64 w-full object-contain object-bottom sm:max-h-80 md:mr-4 md:h-full md:max-h-full' src={assets.header_img} alt="" />
+            <img className='h-90 max-h-64 w-full object-contain object-bottom sm:max-h-80 md:mr-4 md:h-full md:max-h-full' src={assets.header_img} alt="" />
         </div>
     </div>
   )
