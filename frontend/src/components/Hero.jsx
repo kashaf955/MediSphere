@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom'
 
 const Hero = () => {
   return (
-    <div className='relative mt-6 mb-4 flex h-auto flex-col overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#6d73ff] via-primary to-[#343ad4] px-5 py-8 shadow-[0_28px_60px_-32px_rgba(82,88,248,0.85)] sm:px-6 md:h-[calc(100dvh-8.75rem)] md:flex-row md:py-0 md:pl-10 md:pr-0 lg:pl-20'>
+    <div className='relative mt-6 mb-4 flex h-auto flex-col overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#6d73ff] via-primary to-[#343ad4] px-5 py-8 shadow-[0_28px_60px_-32px_rgba(82,88,248,0.85)] sm:px-6 md:h-[calc(100dvh-8rem)] md:flex-row md:items-center md:py-0 md:pl-10 md:pr-0 lg:pl-20'>
         <div className='pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl'></div>
         {/* Left Side */}
-        <div className='relative z-10 flex flex-col items-center justify-center gap-3 text-center md:w-[42%] md:items-start md:py-6 md:pr-4 md:text-left'>
-            <h1 className='font-brand text-3xl font-medium leading-tight tracking-tight text-white lg:text-4xl'>
-                Book Appointment <br className='hidden sm:block' /> With Trusted Doctors
+        <div className='relative z-10 flex min-w-0 flex-1 flex-col items-center justify-center gap-3 text-center md:items-start md:py-10 md:pr-8 md:text-left'>
+            <h1 className='font-brand text-3xl font-medium leading-[1.15] tracking-tight text-white lg:text-4xl'>
+                <span className='block'>Book Appointment</span>
+                <span className='block'>With Trusted Doctors</span>
             </h1>
             <div className='flex flex-col items-center gap-3 text-sm text-white/90 md:flex-row'>
                 <img className='w-24 sm:w-28' src={assets.group_profiles} alt="" />
@@ -20,8 +21,8 @@ const Hero = () => {
             </Link>
         </div>
         {/* Right Side */}
-        <div className='mt-6 flex w-full items-end justify-center md:mt-0 md:w-[58%] md:justify-end'>
-            <img className='h-90 max-h-64 w-full object-contain object-bottom sm:max-h-80 md:mr-4 md:h-full md:max-h-full' src={assets.header_img} alt="" />
+        <div className='mt-6 flex h-72 w-full shrink-0 items-end justify-center sm:h-80 md:mt-0 md:h-full md:w-auto md:justify-end'>
+            <img className='h-full w-auto max-w-full object-contain object-bottom md:mr-6 md:h-[min(38rem,90%)]' src={assets.header_img} alt="" />
         </div>
     </div>
   )
