@@ -20,7 +20,13 @@ const userSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        required: true
+        default: {
+            street: 'not specified',
+            city: 'not specified',
+            state: 'not specified',
+            country: 'not specified',
+            pincode: '000000'
+        }
     },
     gender: {
         type: String,
