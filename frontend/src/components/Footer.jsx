@@ -16,6 +16,7 @@ const Footer = () => {
                     <li><Link to='/' className='transition hover:text-primary'>Home</Link></li>
                     <li><Link to='/about' className='transition hover:text-primary'>About Us</Link></li>
                     <li><Link to='/contact' className='transition hover:text-primary'>Contact Us</Link></li>
+                    <li><Link to='/doctor' className='transition hover:text-primary'>Doctor Portal</Link></li>
                     <li className='text-slate-400'>Privacy Policy</li>
                 </ul>
             </div>
