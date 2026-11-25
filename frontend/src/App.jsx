@@ -12,14 +12,19 @@ import DoctorLogin from './pages/doctor/DoctorLogin'
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import DoctorAppointments from './pages/doctor/DoctorAppointments'
 import DoctorProfile from './pages/doctor/DoctorProfile'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminAppointments from './pages/admin/AdminAppointments'
+import AddDoctor from './pages/admin/AddDoctor'
+import AdminDoctors from './pages/admin/AdminDoctors'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 const App = () => {
   const location = useLocation()
-  const isDoctorPanel = location.pathname.startsWith('/doctor')
+  const isPanel = location.pathname.startsWith('/doctor') || location.pathname.startsWith('/admin')
   return (
-    <div className={isDoctorPanel ? '' : 'mx-4 sm:mx-[10%]'}>
-      {!isDoctorPanel && <Navbar />}
+    <div className={isPanel ? '' : 'mx-4 sm:mx-[10%]'}>
+      {!isPanel && <Navbar />}
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/doctors" element={<Doctors />} />
@@ -34,8 +39,13 @@ const App = () => {
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
       <Route path="/doctor/appointments" element={<DoctorAppointments />} />
       <Route path="/doctor/profile" element={<DoctorProfile />} />
+      <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/appointments" element={<AdminAppointments />} />
+      <Route path="/admin/add-doctor" element={<AddDoctor />} />
+      <Route path="/admin/doctors" element={<AdminDoctors />} />
     </Routes>
-    {!isDoctorPanel && <Footer />}
+    {!isPanel && <Footer />}
     </div>
   )
 }
