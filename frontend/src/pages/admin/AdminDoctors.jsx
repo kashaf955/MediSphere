@@ -29,6 +29,21 @@ const AdminDoctors = () => {
     load(aToken)
   }, [aToken, backendUrl, navigate])
 
+  const remove = async (doctor) => {
+    if (!window.confirm(`Delete ${doctor.name}? This also removes their appointments.`)) return
+    setBusyId(doctor._id)
+    setError('')
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/admin/delete-doctor`, { docId: doctor._id }, { headers: { atoken: aToken } })
+      if (data.success) await load(aToken)
+      else setError(data.message)
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to delete doctor')
+    } finally {
+      setBusyId('')
+    }
+  }
+
   const toggle = async (docId) => {
     setBusyId(docId)
     setError('')
@@ -46,7 +61,7 @@ const AdminDoctors = () => {
   return (
     <AdminLayout>
       <p className='text-3xl tracking-tight text-slate-900'>Doctors</p>
-      <p className='mt-1 text-sm text-slate-500'>Turn availability on or off.</p>
+      <p className='mt-1 text-sm text-slate-500'>The email on each card is that doctor’s dashboard login at /doctor. Starting password is Doctor@123.</p>
       {error && <p className='mt-4 text-sm text-red-500'>{error}</p>}
       <div className='mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
         {doctors.length === 0 && !error && <p className='text-sm text-slate-500'>No doctors yet.</p>}
@@ -55,16 +70,28 @@ const AdminDoctors = () => {
             <img src={doctor.image} alt={doctor.name} className='h-44 w-full bg-[#eef1ff] object-cover' />
             <div className='p-4'>
               <p className='font-medium text-slate-900'>{doctor.name}</p>
+              <p className='text-sm text-slate-500'>{doctor.email}</p>
               <p className='text-sm text-slate-500'>{doctor.specialization}</p>
               <p className='mt-1 text-sm text-slate-500'>{doctor.degree} · {doctor.experience} years · ${doctor.fees}</p>
-              <button
-                type='button'
-                disabled={busyId === doctor._id}
-                onClick={() => toggle(doctor._id)}
-                className={`mt-4 rounded-full px-4 py-2 text-sm disabled:opacity-60 ${doctor.available ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}
-              >
-                {doctor.available ? 'Available' : 'Unavailable'}
-              </button>
+              <div className='mt-4 flex flex-wrap gap-2'>
+                <button
+                  type='button'
+                  disabled={busyId === doctor._id}
+                  onClick={() => toggle(doctor._id)}
+                  className={`rounded-full px-4 py-2 text-sm disabled:opacity-60 ${doctor.available ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}
+                >
+                  {doctor.available ? 'Available' : 'Unavailable'}
+                </button>
+                <button type='button' onClick={() => navigate(`/admin/doctors/${doctor._id}`)} className='rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 transition hover:border-primary hover:text-primary'>Edit</button>
+                <button
+                  type='button'
+                  disabled={busyId === doctor._id}
+                  onClick={() => remove(doctor)}
+                  className='rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 transition hover:border-red-500 hover:bg-red-500 hover:text-white disabled:opacity-60'
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}

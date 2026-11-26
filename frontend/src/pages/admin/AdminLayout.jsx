@@ -8,6 +8,7 @@ const links = [
   { to: '/admin/appointments', label: 'Appointments' },
   { to: '/admin/add-doctor', label: 'Add doctor' },
   { to: '/admin/doctors', label: 'Doctors' },
+  { to: '/admin/patients', label: 'Patients' },
 ]
 
 const AdminLayout = ({ children }) => {
