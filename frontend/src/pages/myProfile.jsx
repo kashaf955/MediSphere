@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
@@ -8,18 +8,22 @@ import { slotLabel, statusClass, statusOf } from './doctor/appointmentDisplay'
 const MyProfile = () => {
   const { token, user, backendUrl, loadUser } = useContext(AppContext)
   const navigate = useNavigate()
+  const location = useLocation()
   const [userData, setUserData] = useState(null)
-  const [isEdit, setIsEdit] = useState(false)
+  const [completing, setCompleting] = useState(Boolean(location.state?.complete))
+  const [isEdit, setIsEdit] = useState(Boolean(location.state?.complete))
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [appointments, setAppointments] = useState([])
+  const [imageFile, setImageFile] = useState(null)
+  const [preview, setPreview] = useState('')
 
   useEffect(() => {
     if (!user) return
     setUserData({
       name: user.name || '',
       email: user.email || '',
-      image: user.image || assets.profile_pic,
+      image: !user.image || user.image.includes('placeholder.com') ? assets.profile_pic : user.image,
       phone: user.phone && user.phone !== '0000000000' ? user.phone : '',
       address: typeof user.address === 'string' && !String(user.address).includes('not specified') ? user.address : '',
       gender: user.gender && user.gender !== 'not specified' ? user.gender : 'Male',
@@ -44,17 +48,23 @@ const MyProfile = () => {
     setError('')
     setMessage('')
     try {
-      const { data } = await axios.post(`${backendUrl}/api/user/update-profile`, {
-        name: userData.name,
-        phone: userData.phone,
-        address: userData.address,
-        gender: userData.gender,
-        dob: userData.dob,
-      }, { headers: { token } })
+      const body = new FormData()
+      body.append('name', userData.name)
+      body.append('phone', userData.phone)
+      body.append('address', userData.address)
+      body.append('gender', userData.gender)
+      body.append('dob', userData.dob)
+      if (imageFile) body.append('image', imageFile)
+      const { data } = await axios.post(`${backendUrl}/api/user/update-profile`, body, { headers: { token } })
       if (data.success) {
         setMessage(data.message)
         setIsEdit(false)
+        setImageFile(null)
+        setPreview('')
+        const next = completing ? (location.state?.from || '/my-profile') : ''
+        setCompleting(false)
         await loadUser(token)
+        if (next && next !== '/my-profile') navigate(next, { replace: true })
       } else {
         setError(data.message)
       }
@@ -76,7 +86,24 @@ const MyProfile = () => {
 
   return (
     <div className='flex max-w-lg flex-col gap-2 pt-8 text-sm'>
-      <img className='w-36 rounded-2xl object-cover shadow-md ring-4 ring-white' src={userData.image} alt='' />
+      {completing && (
+        <div className='mb-4 rounded-3xl border border-primary/20 bg-[#eef1ff] px-5 py-4'>
+          <p className='text-lg tracking-tight text-slate-900'>Complete your profile</p>
+          <p className='mt-1 text-slate-500'>Add your phone, address, birthday, and photo. You can also skip and finish this later.</p>
+        </div>
+      )}
+      {isEdit
+        ? <label className='relative w-36 cursor-pointer'>
+            <img className='h-36 w-36 rounded-2xl object-cover shadow-md ring-4 ring-white' src={preview || userData.image} alt='' />
+            <span className='absolute inset-x-0 bottom-0 rounded-b-2xl bg-slate-900/60 py-1.5 text-center text-xs text-white'>Change photo</span>
+            <input type='file' accept='image/*' hidden onChange={(e) => {
+              const file = e.target.files?.[0] || null
+              setImageFile(file)
+              setPreview(file ? URL.createObjectURL(file) : '')
+            }} />
+          </label>
+        : <img className='h-36 w-36 rounded-2xl object-cover shadow-md ring-4 ring-white' src={userData.image} alt='' />
+      }
       {isEdit
         ? <input className='field mt-4 max-w-60 text-2xl' type='text' value={userData.name} onChange={(e) => setUserData((prev) => ({ ...prev, name: e.target.value }))} />
         : <p className='mt-4 text-3xl tracking-tight text-slate-900'>{userData.name}</p>
@@ -120,30 +147,35 @@ const MyProfile = () => {
       </div>
       {error && <p className='text-sm text-red-500'>{error}</p>}
       {message && <p className='text-sm text-emerald-600'>{message}</p>}
-      <div className='mt-10'>
+      <div className='mt-10 flex flex-wrap gap-3'>
         {isEdit
-          ? <button type='button' className='rounded-full bg-primary px-8 py-2.5 text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5' onClick={save}>Save information</button>
+          ? <button type='button' className='rounded-full bg-primary px-8 py-2.5 text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5' onClick={save}>{completing ? 'Save profile' : 'Save information'}</button>
           : <button type='button' className='rounded-full border border-primary px-8 py-2.5 text-primary transition hover:bg-primary hover:text-white' onClick={() => setIsEdit(true)}>Edit</button>
         }
+        {completing && (
+          <button type='button' className='rounded-full border border-slate-200 px-8 py-2.5 text-slate-600 transition hover:border-slate-400' onClick={() => navigate(location.state?.from || '/', { replace: true })}>Skip for now</button>
+        )}
       </div>
-      <div className='mt-8'>
-        <p className='text-xs tracking-[0.16em] text-slate-400'>APPOINTMENTS</p>
-        <div className='mt-3 flex flex-col gap-3'>
-          {appointments.length === 0 && <p className='text-sm text-slate-500'>No appointments yet.</p>}
-          {appointments.map((item) => {
-            const status = statusOf(item)
-            return (
-              <div key={item._id} className='flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3'>
-                <div>
-                  <p className='font-medium text-slate-900'>{item.docData?.name}</p>
-                  <p className='text-xs text-slate-500'>{slotLabel(item)}</p>
+      {!completing && (
+        <div className='mt-8'>
+          <p className='text-xs tracking-[0.16em] text-slate-400'>APPOINTMENTS</p>
+          <div className='mt-3 flex flex-col gap-3'>
+            {appointments.length === 0 && <p className='text-sm text-slate-500'>No appointments yet.</p>}
+            {appointments.map((item) => {
+              const status = statusOf(item)
+              return (
+                <div key={item._id} className='flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3'>
+                  <div>
+                    <p className='font-medium text-slate-900'>{item.docData?.name}</p>
+                    <p className='text-xs text-slate-500'>{slotLabel(item)}</p>
+                  </div>
+                  <span className={`rounded-full px-3 py-1 text-xs ${statusClass(status)}`}>{status}</span>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs ${statusClass(status)}`}>{status}</span>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

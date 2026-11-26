@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import validator from 'validator'
+import { v2 as cloudinary } from 'cloudinary'
 import userModel from '../models/userModel.js'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
@@ -65,7 +66,15 @@ const updateProfile = async (req, res) => {
         if (!name || !phone || !address || !gender || !dob) {
             return res.status(400).json({ success: false, message: 'All fields are required' })
         }
-        await userModel.findByIdAndUpdate(req.userId, { name, phone, address, gender, dob })
+        const update = { name, phone, address, gender, dob }
+        if (req.file) {
+            if (!req.file.mimetype?.startsWith('image/')) {
+                return res.status(400).json({ success: false, message: 'Profile photo must be an image' })
+            }
+            const uploadedImage = await cloudinary.uploader.upload(req.file.path, { resource_type: 'image' })
+            update.image = uploadedImage.secure_url
+        }
+        await userModel.findByIdAndUpdate(req.userId, update)
         res.json({ success: true, message: 'Profile updated' })
     } catch (error) {
         console.log(error)
