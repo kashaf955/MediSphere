@@ -51,6 +51,24 @@ const AdminDashboard = () => {
             ))}
           </div>
           <div className='mt-8 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_16px_40px_-28px_rgba(26,29,46,0.45)] sm:p-6'>
+            <div className='flex items-center justify-between gap-3'>
+              <p className='text-lg tracking-tight text-slate-900'>Patients</p>
+              <button type='button' onClick={() => navigate('/admin/patients')} className='text-sm text-primary'>View all</button>
+            </div>
+            <div className='mt-4 flex flex-col gap-3'>
+              {dashData.latestPatients.length === 0 && <p className='text-sm text-slate-500'>No patients yet.</p>}
+              {dashData.latestPatients.map((patient) => (
+                <div key={patient._id} className='flex flex-col gap-1 border-t border-slate-100 py-3 sm:flex-row sm:items-center sm:justify-between'>
+                  <div>
+                    <p className='font-medium text-slate-900'>{patient.name}</p>
+                    <p className='text-sm text-slate-500'>{patient.email || 'No email'} · {patient.phone || 'No phone'}</p>
+                  </div>
+                  <p className='text-sm text-slate-500'>{`${patient.appointments} appointment${patient.appointments === 1 ? '' : 's'}`}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className='mt-8 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_16px_40px_-28px_rgba(26,29,46,0.45)] sm:p-6'>
             <p className='text-lg tracking-tight text-slate-900'>Latest appointments</p>
             <div className='mt-4 flex flex-col gap-3'>
               {dashData.latestAppointments.length === 0 && <p className='text-sm text-slate-500'>No appointments yet.</p>}

@@ -17,6 +17,8 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminAppointments from './pages/admin/AdminAppointments'
 import AddDoctor from './pages/admin/AddDoctor'
 import AdminDoctors from './pages/admin/AdminDoctors'
+import EditDoctor from './pages/admin/EditDoctor'
+import AdminPatients from './pages/admin/AdminPatients'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 const App = () => {
@@ -44,6 +46,8 @@ const App = () => {
       <Route path="/admin/appointments" element={<AdminAppointments />} />
       <Route path="/admin/add-doctor" element={<AddDoctor />} />
       <Route path="/admin/doctors" element={<AdminDoctors />} />
+      <Route path="/admin/doctors/:docId" element={<EditDoctor />} />
+      <Route path="/admin/patients" element={<AdminPatients />} />
     </Routes>
     {!isPanel && <Footer />}
     </div>
