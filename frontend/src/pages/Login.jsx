@@ -1,14 +1,40 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { AppContext } from '../context/AppContext'
 
 const Login = () => {
+  const { backendUrl, setToken, token } = useContext(AppContext)
+  const navigate = useNavigate()
+  const location = useLocation()
   const [state, setState] = useState('Sign Up')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [error, setError] = useState('')
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault()
+    setError('')
+    try {
+      const route = state === 'Sign Up' ? 'register' : 'login'
+      const payload = state === 'Sign Up' ? { name, email, password } : { email, password }
+      const { data } = await axios.post(`${backendUrl}/api/user/${route}`, payload)
+      if (data.success) {
+        localStorage.setItem('token', data.token)
+        setToken(data.token)
+        navigate(location.state?.from || '/')
+      } else {
+        setError(data.message)
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to continue')
+    }
   }
+
+  useEffect(() => {
+    if (token) navigate(location.state?.from || '/')
+  }, [token, navigate, location.state])
 
   return (
     <form onSubmit={onSubmit} className='flex min-h-[80vh] items-center py-10'>
@@ -29,6 +55,8 @@ const Login = () => {
           <p className='text-xs tracking-wide text-slate-500'>Password</p>
           <input className='field' type='password' onChange={(e) => setPassword(e.target.value)} value={password} required />
         </div>
+        {state === 'Sign Up' && <p className='text-xs text-slate-400'>Use at least 8 characters.</p>}
+        {error && <p className='text-sm text-red-500'>{error}</p>}
         <button type='submit' className='mt-3 w-full rounded-full bg-primary py-3 text-base text-white shadow-lg shadow-primary/30 transition hover:-translate-y-0.5'>{state === 'Sign Up' ? 'Create Account' : 'Login'}</button>
         {state === 'Sign Up'
           ? <p className='pt-1'>Already have an account? <span onClick={() => setState('Login')} className='cursor-pointer text-primary'>Login here</span></p>
