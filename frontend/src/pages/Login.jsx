@@ -23,7 +23,11 @@ const Login = () => {
       if (data.success) {
         localStorage.setItem('token', data.token)
         setToken(data.token)
-        navigate(location.state?.from || '/')
+        if (state === 'Sign Up') {
+          navigate('/my-profile', { replace: true, state: { complete: true, from: location.state?.from || '/' } })
+        } else {
+          navigate(location.state?.from || '/', { replace: true })
+        }
       } else {
         setError(data.message)
       }
@@ -33,8 +37,8 @@ const Login = () => {
   }
 
   useEffect(() => {
-    if (token) navigate(location.state?.from || '/')
-  }, [token, navigate, location.state])
+    if (token) navigate(location.state?.from || '/', { replace: true })
+  }, [])
 
   return (
     <form onSubmit={onSubmit} className='flex min-h-[80vh] items-center py-10'>
