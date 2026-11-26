@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
+import { slotLabel, statusClass, statusOf } from './doctor/appointmentDisplay'
 
 const MyProfile = () => {
   const { token, user, backendUrl, loadUser } = useContext(AppContext)
@@ -11,6 +12,7 @@ const MyProfile = () => {
   const [isEdit, setIsEdit] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [appointments, setAppointments] = useState([])
 
   useEffect(() => {
     if (!user) return
@@ -24,6 +26,19 @@ const MyProfile = () => {
       dob: user.dob || '',
     })
   }, [user])
+
+  useEffect(() => {
+    if (!token) return
+    const loadAppointments = async () => {
+      try {
+        const { data } = await axios.get(`${backendUrl}/api/user/appointments`, { headers: { token } })
+        if (data.success) setAppointments(data.appointments)
+      } catch (err) {
+        setError(err.response?.data?.message || 'Unable to load appointments')
+      }
+    }
+    loadAppointments()
+  }, [token, backendUrl])
 
   const save = async () => {
     setError('')
@@ -110,6 +125,24 @@ const MyProfile = () => {
           ? <button type='button' className='rounded-full bg-primary px-8 py-2.5 text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5' onClick={save}>Save information</button>
           : <button type='button' className='rounded-full border border-primary px-8 py-2.5 text-primary transition hover:bg-primary hover:text-white' onClick={() => setIsEdit(true)}>Edit</button>
         }
+      </div>
+      <div className='mt-8'>
+        <p className='text-xs tracking-[0.16em] text-slate-400'>APPOINTMENTS</p>
+        <div className='mt-3 flex flex-col gap-3'>
+          {appointments.length === 0 && <p className='text-sm text-slate-500'>No appointments yet.</p>}
+          {appointments.map((item) => {
+            const status = statusOf(item)
+            return (
+              <div key={item._id} className='flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3'>
+                <div>
+                  <p className='font-medium text-slate-900'>{item.docData?.name}</p>
+                  <p className='text-xs text-slate-500'>{slotLabel(item)}</p>
+                </div>
+                <span className={`rounded-full px-3 py-1 text-xs ${statusClass(status)}`}>{status}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { AppContext } from '../context/AppContext'
-import { slotLabel } from './doctor/appointmentDisplay'
+import { slotLabel, statusClass, statusOf } from './doctor/appointmentDisplay'
 
 const MyAppointments = () => {
   const { token, backendUrl, loadDoctors } = useContext(AppContext)
@@ -71,16 +71,16 @@ const MyAppointments = () => {
               <p className='mt-2 text-xs tracking-wide text-slate-400'>ADDRESS</p>
               <p className='text-xs leading-5'>{item.docData?.address}</p>
               <p className='mt-2 text-xs'><span className='font-medium text-slate-700'>Date & Time </span>{slotLabel(item)}</p>
-              {item.cancelled && <p className='mt-2 text-xs text-red-500'>Cancelled</p>}
             </div>
             <div className='flex flex-col justify-end gap-2'>
-              {!item.cancelled && !item.payment && (
+              <span className={`rounded-full px-3 py-2 text-center text-sm sm:min-w-48 ${statusClass(statusOf(item))}`}>{statusOf(item)}</span>
+              {!item.cancelled && !item.isCompleted && !item.payment && (
                 <button type='button' disabled={busyId === item._id} onClick={() => update('pay-appointment', item._id)} className='rounded-full border border-slate-200 py-2 text-center text-sm text-slate-600 transition hover:border-primary hover:bg-primary hover:text-white sm:min-w-48'>Pay Online</button>
               )}
               {!item.cancelled && item.payment && (
                 <button type='button' className='rounded-full border border-emerald-200 bg-emerald-50 py-2 text-center text-sm text-emerald-600 sm:min-w-48'>Paid</button>
               )}
-              {!item.cancelled && (
+              {!item.cancelled && !item.isCompleted && (
                 <button type='button' disabled={busyId === item._id} onClick={() => update('cancel-appointment', item._id)} className='rounded-full border border-slate-200 py-2 text-center text-sm text-slate-600 transition hover:border-red-500 hover:bg-red-500 hover:text-white sm:min-w-48'>Cancel appointment</button>
               )}
             </div>
