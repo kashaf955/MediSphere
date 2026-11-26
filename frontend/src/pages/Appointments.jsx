@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
+import axios from 'axios'
 import { assets } from '../assets/assets'
 
 const Appointments = () => {
   const { docId } = useParams()
-  const { doctors } = useContext(AppContext)
+  const { doctors, doctorsLoaded, token, user, backendUrl, loadDoctors } = useContext(AppContext)
   const navigate = useNavigate()
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
@@ -13,11 +14,15 @@ const Appointments = () => {
   const [docSlots, setDocSlots] = useState([])
   const [slotIndex, setSlotIndex] = useState(0)
   const [slotTime, setSlotTime] = useState('')
-  const [booked, setBooked] = useState(false)
+  const [form, setForm] = useState({ name: '', phone: '', gender: 'Male', dob: '', address: '' })
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     setDocInfo(doctors.find((doc) => doc._id === docId) || null)
-    setBooked(false)
+    setMessage('')
+    setError('')
     setSlotTime('')
     setSlotIndex(0)
   }, [doctors, docId])
@@ -42,7 +47,7 @@ const Appointments = () => {
       while (currentDate < endTime) {
         timeSlots.push({
           datetime: new Date(currentDate),
-          time: currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         })
         currentDate.setMinutes(currentDate.getMinutes() + 30)
       }
@@ -50,6 +55,66 @@ const Appointments = () => {
     }
     setDocSlots(slots)
   }, [docInfo])
+
+  useEffect(() => {
+    if (!user) return
+    setForm((prev) => ({
+      ...prev,
+      name: user.name || '',
+      phone: user.phone && user.phone !== '0000000000' ? user.phone : prev.phone,
+      gender: user.gender && user.gender !== 'not specified' ? user.gender : prev.gender,
+      dob: user.dob || prev.dob,
+      address: typeof user.address === 'string' && !user.address.includes('not specified') ? user.address : prev.address,
+    }))
+  }, [user])
+
+  const slotDateOf = (slot) => {
+    const date = slot.datetime
+    return `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
+  }
+
+  const isTaken = (slot) => {
+    const booked = docInfo?.slots_booked?.[slotDateOf(slot)]
+    return Array.isArray(booked) && booked.includes(slot.time)
+  }
+
+  const bookAppointment = async (event) => {
+    event.preventDefault()
+    if (!slotTime) {
+      setError('Choose a time slot first')
+      return
+    }
+    if (!token) {
+      navigate('/login', { state: { from: `/appointments/${docId}` } })
+      return
+    }
+    setSaving(true)
+    setError('')
+    setMessage('')
+    const slot = docSlots[slotIndex].find((item) => item.time === slotTime)
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/user/book-appointment`, {
+        docId,
+        slotDate: slotDateOf(slot),
+        slotTime,
+        ...form,
+      }, { headers: { token } })
+      if (data.success) {
+        setMessage(data.message)
+        await loadDoctors()
+        navigate('/my-appointments')
+      } else {
+        setError(data.message)
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to book appointment')
+    } finally {
+      setSaving(false)
+    }
+  }
+  if (!doctorsLoaded) {
+    return <p className='py-10 text-gray-600'>Loading doctor...</p>
+  }
 
   if (!docInfo) {
     return <p className='py-10 text-gray-600'>Doctor not found.</p>
@@ -93,7 +158,7 @@ const Appointments = () => {
               onClick={() => {
                 setSlotIndex(index)
                 setSlotTime('')
-                setBooked(false)
+                setError('')
               }}
               className={`min-w-16 rounded-full py-6 text-center text-sm transition ${slotIndex === index ? 'bg-primary text-white shadow-md shadow-primary/30' : 'border border-slate-200 bg-white text-slate-600'}`}
               key={index}
@@ -107,29 +172,63 @@ const Appointments = () => {
           {docSlots[slotIndex]?.map((item, index) => (
             <button
               type='button'
+              disabled={isTaken(item)}
               onClick={() => {
                 setSlotTime(item.time)
-                setBooked(false)
+                setError('')
               }}
-              className={`shrink-0 rounded-full px-5 py-2 text-sm transition ${item.time === slotTime ? 'bg-primary text-white shadow-md shadow-primary/25' : 'border border-slate-200 bg-white text-slate-500'}`}
+              className={`shrink-0 rounded-full px-5 py-2 text-sm transition ${isTaken(item) ? 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-300 line-through' : item.time === slotTime ? 'bg-primary text-white shadow-md shadow-primary/25' : 'border border-slate-200 bg-white text-slate-500'}`}
               key={index}
             >
               {item.time.toLowerCase()}
             </button>
           ))}
         </div>
-        <button
-          type='button'
-          onClick={() => slotTime && setBooked(true)}
-          className='my-6 rounded-full bg-primary px-14 py-3 text-sm text-white shadow-lg shadow-primary/30 transition hover:-translate-y-0.5'
-        >
-          Book an appointment
-        </button>
-        {booked && (
-          <p className='mb-6 text-sm font-normal text-green-600'>
-            Appointment selected for {daysOfWeek[docSlots[slotIndex][0].datetime.getDay()]} {docSlots[slotIndex][0].datetime.getDate()} at {slotTime.toLowerCase()}.
-          </p>
+        {!token && (
+          <button
+            type='button'
+            onClick={() => slotTime && navigate('/login', { state: { from: `/appointments/${docId}` } })}
+            className='my-6 rounded-full bg-primary px-14 py-3 text-sm text-white shadow-lg shadow-primary/30 transition hover:-translate-y-0.5'
+          >
+            Login to book
+          </button>
         )}
+        {token && (
+          <form onSubmit={bookAppointment} className='mt-6 grid max-w-xl gap-3 rounded-3xl border border-slate-200/80 bg-white p-5 font-normal'>
+            <p className='text-lg font-medium text-slate-800'>Patient details</p>
+            <p className='text-sm text-slate-500'>These details are saved with the appointment.</p>
+            <div>
+              <p className='text-xs tracking-wide text-slate-500'>Full name</p>
+              <input className='field' value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} required />
+            </div>
+            <div>
+              <p className='text-xs tracking-wide text-slate-500'>Phone</p>
+              <input className='field' value={form.phone} onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))} required />
+            </div>
+            <div>
+              <p className='text-xs tracking-wide text-slate-500'>Gender</p>
+              <select className='field' value={form.gender} onChange={(e) => setForm((prev) => ({ ...prev, gender: e.target.value }))}>
+                <option value='Male'>Male</option>
+                <option value='Female'>Female</option>
+                <option value='Other'>Other</option>
+              </select>
+            </div>
+            <div>
+              <p className='text-xs tracking-wide text-slate-500'>Date of birth</p>
+              <input className='field' type='date' value={form.dob} onChange={(e) => setForm((prev) => ({ ...prev, dob: e.target.value }))} required />
+            </div>
+            <div>
+              <p className='text-xs tracking-wide text-slate-500'>Address</p>
+              <input className='field' value={form.address} onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))} required />
+            </div>
+            {error && <p className='text-sm text-red-500'>{error}</p>}
+            {message && <p className='text-sm text-emerald-600'>{message}</p>}
+            <button type='submit' disabled={saving || !slotTime} className='rounded-full bg-primary px-8 py-3 text-sm text-white shadow-lg shadow-primary/30 disabled:opacity-60'>
+              {saving ? 'Booking...' : slotTime ? 'Book appointment' : 'Select a time first'}
+            </button>
+          </form>
+        )}
+        {!token && error && <p className='mb-6 text-sm font-normal text-red-500'>{error}</p>}
       </div>
 
       <div className='flex flex-col items-center gap-4 py-16 text-gray-900'>

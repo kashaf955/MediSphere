@@ -128,6 +128,9 @@ const collectPatients = async () => {
         record.appointments += 1
         if (!record.email && userData.email) record.email = userData.email
         if (!record.phone && userData.phone) record.phone = userData.phone
+        if (!record.gender && userData.gender) record.gender = userData.gender
+        if (!record.dob && userData.dob) record.dob = userData.dob
+        if (!record.address && userData.address) record.address = addressText(userData.address)
     })
 
     return [...patients.values()]
