@@ -150,6 +150,16 @@ const updateDoctorProfile = async (req, res) => {
     }
 }
 
+const doctorList = async (req, res) => {
+    try {
+        const doctors = await doctorModel.find({}).select('-password')
+        res.json({ success: true, doctors })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: 'Internal server error' })
+    }
+}
+
 export {
     loginDoctor,
     doctorDashboard,
@@ -158,4 +168,5 @@ export {
     appointmentCancel,
     doctorProfile,
     updateDoctorProfile,
+    doctorList,
 }
