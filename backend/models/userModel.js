@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '0000000000'
     },
+    concern: {
+        type: String,
+        default: ''
+    },
+    preferredSpeciality: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -5,6 +5,7 @@ import { v2 as cloudinary } from 'cloudinary'
 import userModel from '../models/userModel.js'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
+import { suggestSpeciality } from '../services/suggestSpeciality.js'
 
 const signToken = (id) => jwt.sign({ id, role: 'user' }, process.env.JWT_SECRET)
 
@@ -62,11 +63,19 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { name, phone, address, gender, dob } = req.body
+        const { name, phone, address, gender, dob, concern, preferredSpeciality } = req.body
         if (!name || !phone || !address || !gender || !dob) {
             return res.status(400).json({ success: false, message: 'All fields are required' })
         }
-        const update = { name, phone, address, gender, dob }
+        const update = {
+            name,
+            phone,
+            address,
+            gender,
+            dob,
+            concern: concern || '',
+            preferredSpeciality: preferredSpeciality || '',
+        }
         if (req.file) {
             if (!req.file.mimetype?.startsWith('image/')) {
                 return res.status(400).json({ success: false, message: 'Profile photo must be an image' })
@@ -190,4 +199,32 @@ const payAppointment = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, userAppointments, cancelAppointment, payAppointment }
+const suggestDoctors = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.userId).select('-password')
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' })
+        }
+        if (!user.concern && !user.preferredSpeciality) {
+            return res.status(400).json({ success: false, message: 'Add what you need help with on your profile first' })
+        }
+        const suggestion = await suggestSpeciality(user)
+        const doctors = await doctorModel
+            .find({ specialization: suggestion.speciality, available: true })
+            .select('-password -slots_booked')
+            .sort({ experience: -1 })
+            .limit(6)
+        res.json({
+            success: true,
+            speciality: suggestion.speciality,
+            reason: suggestion.reason,
+            source: suggestion.source,
+            doctors,
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: 'Internal server error' })
+    }
+}
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, userAppointments, cancelAppointment, payAppointment, suggestDoctors }
