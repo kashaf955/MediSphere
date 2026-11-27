@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { assets, specialityData } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
@@ -17,6 +17,9 @@ const MyProfile = () => {
   const [appointments, setAppointments] = useState([])
   const [imageFile, setImageFile] = useState(null)
   const [preview, setPreview] = useState('')
+  const [suggestion, setSuggestion] = useState(null)
+  const [suggesting, setSuggesting] = useState(false)
+  const [suggestError, setSuggestError] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -74,6 +77,21 @@ const MyProfile = () => {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to update profile')
+    }
+  }
+
+  const suggest = async () => {
+    setSuggesting(true)
+    setSuggestError('')
+    setSuggestion(null)
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/user/suggest-doctors`, {}, { headers: { token } })
+      if (data.success) setSuggestion(data)
+      else setSuggestError(data.message)
+    } catch (err) {
+      setSuggestError(err.response?.data?.message || 'Unable to suggest doctors')
+    } finally {
+      setSuggesting(false)
     }
   }
 
@@ -177,6 +195,28 @@ const MyProfile = () => {
           <button type='button' className='rounded-full border border-slate-200 px-8 py-2.5 text-slate-600 transition hover:border-slate-400' onClick={() => navigate(location.state?.from || '/', { replace: true })}>Skip for now</button>
         )}
       </div>
+      {!completing && !isEdit && (
+        <div className='mt-8'>
+          <p className='text-xs tracking-[0.16em] text-slate-400'>SUGGESTED DOCTORS</p>
+          <button type='button' disabled={suggesting} onClick={suggest} className='mt-3 rounded-full bg-primary px-8 py-2.5 text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 disabled:opacity-60'>{suggesting ? 'Looking...' : 'Suggest doctors'}</button>
+          {suggestError && <p className='mt-3 text-sm text-red-500'>{suggestError}</p>}
+          {suggestion && (
+            <div className='mt-4 flex flex-col gap-3'>
+              <p className='text-slate-600'>{suggestion.reason}</p>
+              {suggestion.doctors.length === 0 && <p className='text-sm text-slate-500'>No available doctors in {suggestion.speciality} right now.</p>}
+              {suggestion.doctors.map((doctor) => (
+                <Link key={doctor._id} to={`/appointments/${doctor._id}`} className='flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 transition hover:border-primary'>
+                  <img src={doctor.image} alt={doctor.name} className='h-14 w-14 rounded-xl bg-[#eef1ff] object-cover' />
+                  <div>
+                    <p className='font-medium text-slate-900'>{doctor.name}</p>
+                    <p className='text-xs text-slate-500'>{doctor.specialization} · ${doctor.fees}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       {!completing && (
         <div className='mt-8'>
           <p className='text-xs tracking-[0.16em] text-slate-400'>APPOINTMENTS</p>
