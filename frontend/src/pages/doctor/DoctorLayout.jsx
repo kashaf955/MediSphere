@@ -6,6 +6,7 @@ import { AppContext } from '../../context/AppContext'
 const links = [
   { to: '/doctor/dashboard', label: 'Dashboard' },
   { to: '/doctor/appointments', label: 'Appointments' },
+  { to: '/doctor/reports', label: 'Reports' },
   { to: '/doctor/profile', label: 'Profile' },
 ]
 
