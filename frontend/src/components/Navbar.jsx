@@ -71,7 +71,12 @@ const Navbar = () => {
               )}
             </NavLink>
           ))}
-          {!token && (
+          {token ? (
+            <>
+              <button type="button" onClick={() => { setShowMenu(false); navigate("/my-appointments") }} className="rounded-md px-4 py-3 text-left">My Appointments</button>
+              <button type="button" onClick={() => { setShowMenu(false); navigate("/my-profile") }} className="rounded-md px-4 py-3 text-left">My Profile</button>
+            </>
+          ) : (
             <button type="button" onClick={() => { setShowMenu(false); navigate("/login") }} className="rounded-full bg-primary px-4 py-3 text-left text-white">Create Account</button>
           )}
         </ul>

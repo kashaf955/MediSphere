@@ -1,16 +1,18 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Hero from '../components/Hero'
 import SpecialityMenu from '../components/specialityMenu'
 import TopDotors from '../components/TopDotors'
-import SuggestedDoctors from '../components/SuggestedDoctors'
 import Banner from '../components/Banner'
+import PatientHome from '../components/PatientHome'
+import { AppContext } from '../context/AppContext'
 
 const Home = () => {
+  const { token } = useContext(AppContext)
+  if (token) return <PatientHome />
   return (
     <div>
         <Hero />
         <SpecialityMenu />
-        <SuggestedDoctors />
         <TopDotors />
         <Banner />
     </div>
