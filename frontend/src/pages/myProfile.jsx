@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { assets } from '../assets/assets'
+import { assets, specialityData } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import { slotLabel, statusClass, statusOf } from './doctor/appointmentDisplay'
 
@@ -28,6 +28,8 @@ const MyProfile = () => {
       address: typeof user.address === 'string' && !String(user.address).includes('not specified') ? user.address : '',
       gender: user.gender && user.gender !== 'not specified' ? user.gender : 'Male',
       dob: user.dob || '',
+      concern: user.concern || '',
+      preferredSpeciality: user.preferredSpeciality || '',
     })
   }, [user])
 
@@ -54,6 +56,8 @@ const MyProfile = () => {
       body.append('address', userData.address)
       body.append('gender', userData.gender)
       body.append('dob', userData.dob)
+      body.append('concern', userData.concern)
+      body.append('preferredSpeciality', userData.preferredSpeciality)
       if (imageFile) body.append('image', imageFile)
       const { data } = await axios.post(`${backendUrl}/api/user/update-profile`, body, { headers: { token } })
       if (data.success) {
@@ -89,7 +93,7 @@ const MyProfile = () => {
       {completing && (
         <div className='mb-4 rounded-3xl border border-primary/20 bg-[#eef1ff] px-5 py-4'>
           <p className='text-lg tracking-tight text-slate-900'>Complete your profile</p>
-          <p className='mt-1 text-slate-500'>Add your phone, address, birthday, and photo. You can also skip and finish this later.</p>
+          <p className='mt-1 text-slate-500'>Add your phone, address, birthday, photo, and what you need help with. You can also skip and finish this later.</p>
         </div>
       )}
       {isEdit
@@ -142,6 +146,23 @@ const MyProfile = () => {
           {isEdit
             ? <input className='field max-w-40' type='date' onChange={(e) => setUserData((prev) => ({ ...prev, dob: e.target.value }))} value={userData.dob} />
             : <p className='text-gray-400'>{userData.dob || 'Not provided'}</p>
+          }
+        </div>
+      </div>
+      <div>
+        <p className='mt-3 text-xs tracking-[0.16em] text-slate-400'>WHAT YOU NEED HELP WITH</p>
+        <div className='mt-3 flex flex-col gap-2.5 text-neutral-700'>
+          {isEdit
+            ? <textarea className='field min-h-24' placeholder='Describe the symptoms or concern' value={userData.concern} onChange={(e) => setUserData((prev) => ({ ...prev, concern: e.target.value }))} />
+            : <p className='text-gray-500'>{userData.concern || 'Not provided'}</p>
+          }
+          <p className='font-medium'>Preferred speciality</p>
+          {isEdit
+            ? <select className='field max-w-60' value={userData.preferredSpeciality} onChange={(e) => setUserData((prev) => ({ ...prev, preferredSpeciality: e.target.value }))}>
+                <option value=''>No preference</option>
+                {specialityData.map((item) => <option key={item.speciality} value={item.speciality}>{item.speciality}</option>)}
+              </select>
+            : <p className='text-gray-400'>{userData.preferredSpeciality || 'No preference'}</p>
           }
         </div>
       </div>

@@ -62,11 +62,19 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { name, phone, address, gender, dob } = req.body
+        const { name, phone, address, gender, dob, concern, preferredSpeciality } = req.body
         if (!name || !phone || !address || !gender || !dob) {
             return res.status(400).json({ success: false, message: 'All fields are required' })
         }
-        const update = { name, phone, address, gender, dob }
+        const update = {
+            name,
+            phone,
+            address,
+            gender,
+            dob,
+            concern: concern || '',
+            preferredSpeciality: preferredSpeciality || '',
+        }
         if (req.file) {
             if (!req.file.mimetype?.startsWith('image/')) {
                 return res.status(400).json({ success: false, message: 'Profile photo must be an image' })
