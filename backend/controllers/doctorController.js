@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
+import { buildDoctorReport } from '../services/doctorReport.js'
 
 const safeAppointments = (appointments) => appointments.map((item) => {
     const data = item.toObject()
@@ -150,6 +151,17 @@ const updateDoctorProfile = async (req, res) => {
     }
 }
 
+const doctorReport = async (req, res) => {
+    try {
+        const period = req.query.period === 'monthly' ? 'monthly' : 'weekly'
+        const report = await buildDoctorReport(req.docId, period)
+        res.json({ success: true, report })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: 'Internal server error' })
+    }
+}
+
 const doctorList = async (req, res) => {
     try {
         const doctors = await doctorModel.find({}).select('-password')
@@ -168,5 +180,6 @@ export {
     appointmentCancel,
     doctorProfile,
     updateDoctorProfile,
+    doctorReport,
     doctorList,
 }
